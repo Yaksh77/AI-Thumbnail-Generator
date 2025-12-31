@@ -49,7 +49,7 @@ export const loginUser = async (req: Request, res: Response) => {
     req.session.userId = user._id;
 
     return res
-      .status(201)
+      .status(200)
       .json({ message: "User loginned successfully", user });
   } catch (error: any) {
     console.log(error);
