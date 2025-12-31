@@ -3,14 +3,44 @@ import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 dotenv.config();
-const app = express();
+import session from "express-session";
+import MongoStore from "connect-mongo";
+import AuthRouter from "./routes/AuthRoutes.js";
 
-app.use(cors());
+declare module "express-session" {
+  interface SessionData {
+    isLoggedIn: boolean;
+    userId: string;
+  }
+}
+
+const app = express();
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "http://localhost:3000"],
+    credentials: true,
+  })
+);
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET as string,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    },
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URI as string,
+      collectionName: "sessions",
+    }),
+  })
+);
 app.use(express.json());
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Server is Live!");
 });
+app.use("/api/auth", AuthRouter);
 
 const port = process.env.PORT || 3000;
 
