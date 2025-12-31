@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import SoftBackdrop from "../components/SoftBackdrop";
-import { dummyThumbnails, type IThumbnail } from "../assets/assets/assets";
+import { type IThumbnail } from "../assets/assets/assets";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowUpRightIcon, DownloadIcon, TrashIcon } from "lucide-react";
+import api from "../configs/api";
+import toast from "react-hot-toast";
+import { motion } from "motion/react";
 
 const MyGeneration = () => {
   const aspectRatioClassMap: Record<string, string> = {
@@ -16,16 +19,37 @@ const MyGeneration = () => {
   const [loading, setLoading] = useState(false);
 
   const fetchThumbnails = async () => {
-    setThumbnails(dummyThumbnails as unknown as IThumbnail[]);
-    setLoading(false);
+    try {
+      setLoading(true);
+      const { data } = await api.get("/api/user/thumbnails");
+      setThumbnails(data.thumbnails || []);
+      setLoading(false);
+    } catch (error: any) {
+      console.log(error);
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDownload = (image_url: string) => {
-    window.open(image_url, "_blank");
+    const link = document.createElement("a");
+    link.href = image_url.replace("/upload", "/upload/fl_attachment");
+    link.click();
+    link.remove();
   };
 
-  const handleDelete = (id: string) => {
-    console.log(id);
+  const handleDelete = async (id: string) => {
+    try {
+      const confirm = window.confirm("Are you sure you want to delete?");
+      if (!confirm) return;
+      await api.delete(`/api/thumbnail/delete/${id}`);
+      toast.success("Thumbnail deleted successfully");
+      setThumbnails(thumbnails.filter((thumbnail) => thumbnail._id !== id));
+    } catch (error: any) {
+      console.log(error);
+      toast.error(error.message);
+    }
   };
 
   useEffect(() => {
@@ -70,7 +94,12 @@ const MyGeneration = () => {
 
         {/* Grid */}
         {!loading && thumbnails.length > 0 && (
-          <div className="columns-1 sm:columns-2 lg:columns-3 2xl:columns-4 gap-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+            className="columns-1 sm:columns-2 lg:columns-3 2xl:columns-4 gap-8"
+          >
             {thumbnails.map((thumbnail: IThumbnail) => {
               const aspectClass =
                 aspectRatioClassMap[thumbnail.aspect_ratio || "16:9"];
@@ -149,7 +178,7 @@ const MyGeneration = () => {
                 </div>
               );
             })}
-          </div>
+          </motion.div>
         )}
       </div>
     </>
