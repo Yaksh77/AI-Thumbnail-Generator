@@ -1,7 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import type { IThumbnail } from "../assets/assets/assets";
+import {
+  colorSchemes,
+  dummyThumbnails,
+  type AspectRatio,
+  type IThumbnail,
+  type ThumbnailStyle,
+} from "../assets/assets/assets";
 import SoftBackdrop from "../components/SoftBackdrop";
+import AspectRatioSelect from "../components/AspectRatioSelect";
+import StyleSelector from "../components/StyleSelector";
+import ColorSchemeSelector from "../components/ColorSchemeSelector";
+import PreviewPanel from "../components/PreviewPanel";
 
 const Generate = () => {
   const { id } = useParams();
@@ -9,6 +19,35 @@ const Generate = () => {
   const [additinalDetails, setAdditinalDetails] = useState("");
   const [thumbnail, setThumbnail] = useState<IThumbnail | null>(null);
   const [loading, setLoading] = useState(false);
+  const [aspectRatio, setAspectRatio] = useState<AspectRatio>("16:9");
+  const [colorSchemeId, setColorSchemeId] = useState<string>(
+    colorSchemes[0].id
+  );
+  const [style, setStyle] = useState<ThumbnailStyle>("Bold & Graphic");
+  const [styleDropdownOpen, setStyleDropdownOpen] = useState(false);
+
+  const handleGenerate = async () => {};
+
+  const fetchThumbnail = async () => {
+    if (id) {
+      const thumbnail: any = dummyThumbnails.find(
+        (thumbnail) => thumbnail._id === id
+      );
+      setThumbnail(thumbnail);
+      setAdditinalDetails(thumbnail.user_prompt);
+      setTitle(thumbnail.title);
+      setColorSchemeId(thumbnail.color_scheme);
+      setAspectRatio(thumbnail.aspect_ratio);
+      setStyle(thumbnail.style);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (id) {
+      fetchThumbnail();
+    }
+  }, [id]);
 
   return (
     <>
@@ -47,9 +86,26 @@ const Generate = () => {
                       </span>
                     </div>
                   </div>
+
                   {/* AspectRatio */}
+                  <AspectRatioSelect
+                    value={aspectRatio}
+                    onChange={setAspectRatio}
+                  />
+
                   {/* StyleSelector */}
+                  <StyleSelector
+                    value={style}
+                    onChange={setStyle}
+                    isOpen={styleDropdownOpen}
+                    setIsOpen={setStyleDropdownOpen}
+                  />
+
                   {/* ColorSchemeSelector */}
+                  <ColorSchemeSelector
+                    value={colorSchemeId}
+                    onChange={setColorSchemeId}
+                  />
 
                   {/* Details */}
 
@@ -77,7 +133,18 @@ const Generate = () => {
             </div>
 
             {/* Right Panel */}
-            <div></div>
+            <div>
+              <div className="p-6 rounded-2xl bg-white/8 border border-white/10 shadow-xl">
+                <h2 className="text-lg font-semibold text-zinc-100 mb-4">
+                  Preview
+                </h2>
+                <PreviewPanel
+                  thumbnail={thumbnail}
+                  isLoading={loading}
+                  aspectRatio={aspectRatio}
+                />
+              </div>
+            </div>
           </div>
         </main>
       </div>
