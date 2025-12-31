@@ -141,7 +141,7 @@ const MyGeneration = () => {
 
                     <Link
                       target="_blank"
-                      to={`/preview?thubnail_url=${thumbnail.image_url}&title=${thumbnail.title}`}
+                      to={`/preview?thumbnail_url=${thumbnail.image_url}&title=${thumbnail.title}`}
                     >
                       <ArrowUpRightIcon className="size-6 bg-black/50 p-1 rounded hover:bg-pink-600 transition-all" />
                     </Link>
