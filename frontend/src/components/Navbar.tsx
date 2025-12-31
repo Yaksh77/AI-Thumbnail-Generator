@@ -57,7 +57,7 @@ export default function Navbar() {
         <Link onClick={() => setIsOpen(false)} to={"/"}>
           Home
         </Link>
-        <Link onClick={() => setIsOpen(false)} to={"/genreate"}>
+        <Link onClick={() => setIsOpen(false)} to={"/generate"}>
           Genreate
         </Link>
         <Link onClick={() => setIsOpen(false)} to={"/my-generation"}>
